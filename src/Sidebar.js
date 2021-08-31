@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import { Avatar, IconButton } from "@material-ui/core";
 import DonutLargeIcon from "@material-ui/icons/DonutLarge";
 import ChatIcon from "@material-ui/icons/Chat";
@@ -8,9 +7,11 @@ import { SearchOutlined } from "@material-ui/icons";
 import "./Sidebar.css";
 import SidebarChat from "./SidebarChat";
 import db from './firebase';
+import { useStateValue } from "./StateProvider";
 
 function Sidebar() {
   const [rooms, setRooms] = useState([]);
+  const [{ user }, dispatch] = useStateValue();
 
   //Only wanna do it once, not again (when the sidebar component loads) or browser will be slow
   useEffect(() => {
@@ -31,7 +32,7 @@ function Sidebar() {
   return (
     <div className="sidebar">
       <div className="sidebar__header">
-        <Avatar />
+        <Avatar src={user?.photoURL} />
         <div className="sidebar__headerRight">
           <IconButton>
             <DonutLargeIcon />

@@ -1,26 +1,43 @@
 import { Avatar, IconButton } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import "./Chat.css";
-import { AttachFile, SearchOutlined, MoreVert, InsertEmoticon, Mic } from "@material-ui/icons";
-import { useParams } from 'react-router-dom';
+import {
+  AttachFile,
+  SearchOutlined,
+  MoreVert,
+  InsertEmoticon,
+  Mic,
+} from "@material-ui/icons";
+import { useParams } from "react-router-dom";
 import db from "./firebase";
+import firebase from "firebase";
+import { useStateValue } from './StateProvider';
 
 function Chat() {
   const [input, setInput] = useState("");
-  /*Inorder to get random avatat icon of human from api below */
+  /*Inorder to get random avatar icon of human from api below */
   const [seed, setSeed] = useState("");
   const { roomId } = useParams();
   const [roomName, setRoomName] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [{ user }, dispatch] = useStateValue();
 
-    /*Everytime roomId changes, we will get Respective messages*/
+  /*Everytime roomId changes, we will get Respective messages*/
   useEffect(() => {
-    if (roomId){
-      db.collection('rooms').doc(roomId).onSnapshot(snapshot => (
-        setRoomName(snapshot.data().name)
-      ))
+    if (roomId) {
+      db.collection("rooms")
+        .doc(roomId)
+        .onSnapshot((snapshot) => setRoomName(snapshot.data().name));
+
+      db.collection("rooms")
+        .doc(roomId)
+        .collection("messages")
+        .orderBy("timestamp", "asc")
+        .onSnapshot((snapshot) =>
+          setMessages(snapshot.docs.map((doc) => doc.data()))
+        );
     }
   }, [roomId]);
-
 
   useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
@@ -28,11 +45,16 @@ function Chat() {
   //just above roomId changes avatar of the chat when click, if you leave it blank it will not change
 
   const sendMessage = (e) => {
-        e.preventDefault();  // without this if you hit enter screen will refresh
-        console.log('You type input', input);
+    e.preventDefault(); // without this if you hit enter screen will refresh
+    console.log("You type input", input);
 
-        setInput(""); // clean the input
-        
+    db.collection("rooms").doc(roomId).collection("messages").add({
+      message : input,
+      name: user.displayName,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    setInput(""); // clean the input
   };
 
   return (
@@ -42,7 +64,12 @@ function Chat() {
 
         <div className="chat__headerInfo">
           <h3>{roomName}</h3>
-          <p> Last seen at...</p>
+          <p> Last seen at {" "}
+              {new Date(
+                messages[messages.length - 1]?.
+                timestamp?.toDate()
+              ).toUTCString()}
+          </p>
         </div>
 
         <div className="chat__headerRight">
@@ -59,24 +86,33 @@ function Chat() {
       </div>
 
       <div className="chat__body">
-          <p className={`chat__message ${true && 'chat__receiver'}`}> 
-            <span className="chat__name"> Abhishek Sadhu
-            </span>
-            Hey Guys
-          <span className="chat__timestamp">3.52pm</span>
-          </p>
+        {messages.map((message) => (
+        <p className={`chat__message ${message.name === user.displayName && "chat__receiver"}`}>
+          <span className="chat__name"> 
+          {message.name}</span>
+          {message.message}
+          <span className="chat__timestamp">
+            {new Date(message.timestamp?.toDate()).toUTCString()}
+          </span>
+        </p>
+        ))}
       </div>
 
       <div className="chat__footer">
-          <InsertEmoticon />
-          <form>
-              <input value={input} onChange={ e => 
-                setInput(e.target.value)}
-                 placeholder="Type a message"
-                 type="text" />
-              <button onClick={sendMessage} type ="submit"> Send a message </button>
-          </form>
-          <Mic />
+        <InsertEmoticon />
+        <form>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message"
+            type="text"
+          />
+          <button onClick={sendMessage} type="submit">
+            {" "}
+            Send a message{" "}
+          </button>
+        </form>
+        <Mic />
       </div>
     </div>
   );
