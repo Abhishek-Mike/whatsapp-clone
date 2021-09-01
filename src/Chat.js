@@ -1,13 +1,7 @@
 import { Avatar, IconButton } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import "./Chat.css";
-import {
-  AttachFile,
-  SearchOutlined,
-  MoreVert,
-  InsertEmoticon,
-  Mic,
-} from "@material-ui/icons";
+import { AttachFile, SearchOutlined, MoreVert, InsertEmoticon, Mic } from "@material-ui/icons";
 import { useParams } from "react-router-dom";
 import db from "./firebase";
 import firebase from "firebase";
@@ -27,13 +21,13 @@ function Chat() {
     if (roomId) {
       db.collection("rooms")
         .doc(roomId)
-        .onSnapshot((snapshot) => setRoomName(snapshot.data().name));
+        .onSnapshot(snapshot => setRoomName(snapshot.data().name));
 
       db.collection("rooms")
         .doc(roomId)
         .collection("messages")
         .orderBy("timestamp", "asc")
-        .onSnapshot((snapshot) =>
+        .onSnapshot(snapshot =>
           setMessages(snapshot.docs.map((doc) => doc.data()))
         );
     }
@@ -68,7 +62,7 @@ function Chat() {
               {new Date(
                 messages[messages.length - 1]?.
                 timestamp?.toDate()
-              ).toUTCString()}
+              ).toLocaleString()}
           </p>
         </div>
 
@@ -92,7 +86,7 @@ function Chat() {
           {message.name}</span>
           {message.message}
           <span className="chat__timestamp">
-            {new Date(message.timestamp?.toDate()).toUTCString()}
+            {new Date(message.timestamp?.toDate()).toLocaleString()}
           </span>
         </p>
         ))}
