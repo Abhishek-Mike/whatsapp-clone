@@ -18,3 +18,5 @@ const provider = new firebase.auth.GoogleAuthProvider();    // Google Authentica
 
 export { auth, provider };
 export default db;
+
+

@@ -1,7 +1,9 @@
 import { Avatar, IconButton } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import "./Chat.css";
-import { AttachFile, SearchOutlined, MoreVert, InsertEmoticon, Mic } from "@material-ui/icons";
+import { AttachFile, SearchOutlined, MoreVert, InsertEmoticon, Mic} from "@material-ui/icons";
+import VideoCallIcon from '@material-ui/icons/VideoCall';
+import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import { useParams } from "react-router-dom";
 import db from "./firebase";
 import firebase from "firebase";
@@ -19,15 +21,17 @@ function Chat() {
   /*Everytime roomId changes, we will get Respective messages*/
   useEffect(() => {
     if (roomId) {
-      db.collection("rooms")
-        .doc(roomId)
-        .onSnapshot(snapshot => setRoomName(snapshot.data().name));
+      db.collection('rooms').doc(roomId).onSnapshot(snapshot => {
+        setRoomName(snapshot.data().name);
+    });
+
+        
 
       db.collection("rooms")
         .doc(roomId)
         .collection("messages")
         .orderBy("timestamp", "asc")
-        .onSnapshot(snapshot =>
+        .onSnapshot((snapshot) =>
           setMessages(snapshot.docs.map((doc) => doc.data()))
         );
     }
@@ -39,7 +43,7 @@ function Chat() {
   //just above roomId changes avatar of the chat when click, if you leave it blank it will not change
 
   const sendMessage = (e) => {
-    e.preventDefault(); // without this if you hit enter screen will refresh
+    e.preventDefault(); // without this if you hit enter , screen will refresh
     console.log("You type input", input);
 
     db.collection("rooms").doc(roomId).collection("messages").add({
@@ -93,7 +97,9 @@ function Chat() {
       </div>
 
       <div className="chat__footer">
+      <IconButton>
         <InsertEmoticon />
+      </IconButton>
         <form>
           <input
             value={input}
@@ -106,7 +112,15 @@ function Chat() {
             Send a message{" "}
           </button>
         </form>
-        <Mic />
+        <IconButton>
+          <InsertPhotoIcon />
+        </IconButton>
+        <IconButton>
+          <VideoCallIcon />
+        </IconButton>
+        <IconButton>
+          <Mic />
+        </IconButton>
       </div>
     </div>
   );

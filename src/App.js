@@ -24,8 +24,6 @@ function App() {
                   <Chat />              {/* Chat Component*/}
                 </Route>
                 <Route path="/">
-                  <h1>Testing Home screen</h1>
-                  <Chat />
                 </Route>
             </Switch>
           </Router>                
