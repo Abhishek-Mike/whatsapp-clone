@@ -19,23 +19,19 @@ function Chat() {
   const [{ user }, dispatch] = useStateValue();
 
   /*Everytime roomId changes, we will get Respective messages*/
-  useEffect(() => {
-    if (roomId) {
-      db.collection('rooms').doc(roomId).onSnapshot(snapshot => {
-        setRoomName(snapshot.data().name);
-    });
-
+  useEffect(()=>{
+    if(roomId){
+       const value = db.collection('rooms').doc(roomId).onSnapshot(snapshot => {
+            setRoomName(snapshot.data().name);
+        });
         
 
-      db.collection("rooms")
-        .doc(roomId)
-        .collection("messages")
-        .orderBy("timestamp", "asc")
-        .onSnapshot((snapshot) =>
-          setMessages(snapshot.docs.map((doc) => doc.data()))
-        );
-    }
-  }, [roomId]);
+        db.collection('rooms').doc(roomId).collection("messages").orderBy("timestamp","asc").onSnapshot(snapshot => {
+            setMessages(snapshot.docs.map(doc => doc.data()))
+        });
+
+      }
+  },[roomId])
 
   useEffect(() => {
     setSeed(Math.floor(Math.random() * 5000));
